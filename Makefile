@@ -6,8 +6,8 @@ CCFLAGS = -Wall
 
 all: $(TARGET)
 
-main: main.o util.o
-	${CC} ${CCFLAGS} -o $@ main.o
+test-shm: test-shm.o util.o
+	${CC} ${CCFLAGS} -o $@ test-shm.o
 
 .c.o:
 	${CC} ${CCFLAGS} -c $<

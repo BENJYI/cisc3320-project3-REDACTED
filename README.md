@@ -1,13 +1,13 @@
 # Project 3: In-Place Computing Sum of Large Arrays on Multicore Systems
 
 ### Note:
-1. Compile **main.c** as it contains the primary code.
+1. Compile **test-shm.c** as it contains the primary code.
 2. Run the compiled file followed by two arguments: (1) a .txt file of white-spaced numbers, (2) the number of elements in the .txt file
 3. A test file, **testfile-128.txt** has been added. This test file contains 128 white spaced numbers.
 
 ### Example Usage:
-1. gcc -o main main.c
-2. ./main.c testfile-128.txt 128
+1. gcc -o test-shm test-shm.c
+2. ./test-shm.c testfile-128.txt 128
 
 
 ## Project Description
