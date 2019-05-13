@@ -1,4 +1,4 @@
-SRC = test-single.c test-switch.c test-switch2.c test-pthread.c
+SRC = test-shm.c
 OBJ = $(addsuffix .o, $(basename $(SRC)))
 TARGET = $(basename $(OBJ))
 CC = gcc
