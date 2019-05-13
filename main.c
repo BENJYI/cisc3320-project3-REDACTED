@@ -15,9 +15,19 @@ void fileToArray(char *filename, double *f, int array_size) {
   }
 }
 
+double getPartialSum(int i, double *f, int l, int r) {
+  double sum = 0;
+  for(int i = l; i < r; i++) {
+    sum += f[i];
+  }
+  printf("PART %d IS DONE!!! SUM IS: %f\n", i, sum);
+  return sum;
+}
+
 int main(int argc, char *argv[]) {
   char *filename = argv[1];
-  int array_size;
+  int array_size, m;
+  int status = 0;
   double *f;
 
   /* argument parsing */
@@ -27,5 +37,27 @@ int main(int argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
   fileToArray(filename, f, array_size);
+
+  // Check for number of threads
+  m = 4;
+  int range = array_size / m;
+
+  double total = 0;
+  // Split array by stride
+  for (int i = 0; i < m; i++) {
+    double sum;
+    if (fork() == 0) {
+      printf("[son] pid %d from [parent] pid %d\n",getpid(),getppid());
+      // sum = getPartialSum(i, f, i*range, (i+1)*range);  
+    }
+    wait(NULL);
+    total += sum;
+  }
+  
+  // double compareTotal = 0;
+  // for (int i = 0; i < array_size; i++) {
+  //   compareTotal += f[i];
+  // }
+  // printf("%f == %f ?", total, compareTotal);
   return 0;
 }
