@@ -6,7 +6,7 @@
 3. A test file, **testfile-128.txt** has been added. This test file contains 128 white spaced numbers.
 
 ### Example Usage:
-1. gcc -o test-shm test-shm.c
+1. make
 2. ./test-shm.c testfile-128.txt 128
 
 
