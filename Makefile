@@ -6,7 +6,7 @@ CCFLAGS = -Wall
 
 all: $(TARGET)
 
-test-shm: test-shm.o util.o
+test-shm: test-shm.o
 	${CC} ${CCFLAGS} -o $@ test-shm.o
 
 .c.o:
