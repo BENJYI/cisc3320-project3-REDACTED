@@ -5,6 +5,8 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <sys/mman.h>
+#include <sys/sysinfo.h>
+#include <sched.h>
 
 void fileToArray(char *filename, double *f, int array_size) {
   FILE *file = fopen(filename, "r");
@@ -27,8 +29,30 @@ void setPartialSum(double *f, int l, int r) {
 int main(int argc, char *argv[]) {
   char *filename = argv[1];
   int array_size, m; 
-  m = 4; // number of theads/processes
+  size_t size;
+  m = get_nprocs(); // number of theads/processes
   double *f;
+  struct sched_param sp;
+  cpu_set_t *set;
+  set = CPU_ALLOC(m);
+  if (set == NULL) {
+    perror("CPU_ALLOC()");
+   exit(EXIT_FAILURE);
+  }
+  
+  /* initialize cpu sets */
+  size = CPU_ALLOC_SIZE(m);
+  CPU_ZERO_S(size, set);
+  for (int i = 0; i < m; i++) {
+    CPU_SET_S(i, size, set);
+  }
+
+  /* configure scheduler */
+  sp.sched_priority = sched_get_priority_max(SCHED_FIFO);
+  if (sched_setscheduler(0, SCHED_FIFO, &sp) < 0) {
+    perror("sched_setscheduler()");
+    exit(EXIT_FAILURE);
+  }
 
   /* parse arguments */
   sscanf(argv[2], "%i", &array_size);
@@ -52,6 +76,11 @@ int main(int argc, char *argv[]) {
   /* fork processes and get partial sums */
   for (int id = 0; id < m; id++) {
     if (fork() == 0) {
+      /* set processor to child */
+      if (sched_setaffinity(getpid(), sizeof(set), set) < 0) {
+        perror("sched_setaffinity()");
+        exit(EXIT_FAILURE);
+      }
       setPartialSum(f, id*stride, (id+1)*stride);
       exit(0);  
     } else {

@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/wait.h>
+#include <sys/types.h>
+#include <sys/mman.h>
 
 void fileToArray(char *filename, double *f, int array_size) {
   FILE *file = fopen(filename, "r");
@@ -15,23 +18,18 @@ void fileToArray(char *filename, double *f, int array_size) {
   }
 }
 
-void getPartialSum(int *fd, int id, double *f, int l, int r) {
-  close(fd[2*id]);
-  double sum = 0;
-  for(int i = l; i < r; i++) {
-    sum += f[i];
+void setPartialSum(double *f, int l, int r) {
+  while (l+1 < r) {
+    f[l+1] += f[l];
+    l++;
   }
-  write(fd[2*id+1], &sum, sizeof(double));
-  close(fd[2*id+1]);
+  printf("index: %d, val: %f \n", r-1, f[r-1]);
 }
 
 int main(int argc, char *argv[]) {
   char *filename = argv[1];
   int array_size, m; 
   m = 4; // number of theads/processes
-  int status = 0;
-  int range = array_size / m;
-  int fd[2*m];
   double *f;
 
   /* parse arguments */
@@ -40,19 +38,23 @@ int main(int argc, char *argv[]) {
     perror("malloc()");
     exit(EXIT_FAILURE);
   }
+  f = mmap(NULL, array_size*sizeof(double), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+  if (f < 0) {
+    perror("mmap()");
+    exit(EXIT_FAILURE);
+  }
   fileToArray(filename, f, array_size);
+  int stride = array_size / m;
 
-  /* create pipes for each child */
-  for (int i = 0; i < m; i++) {
-    if (pipe(&fd[2*i]) < 0) {
-      perror("pipe()");
-    }
+  double compareTotal = 0;
+  for (int i = 0; i < array_size; i++) {
+    compareTotal += f[i];
   }
 
   /* fork processes and get partial sums */
   for (int id = 0; id < m; id++) {
     if (fork() == 0) {
-      getPartialSum(fd, id, f, id*range, (id+1)*range);
+      setPartialSum(f, id*stride, (id+1)*stride);
       exit(0);  
     } else {
       wait(NULL);
@@ -60,25 +62,17 @@ int main(int argc, char *argv[]) {
   }
 
   /* read partial sums from each child */
-  double total = 0;
-  for (int i = 0; i < m; i++) {
-    double sum; 
-    read(fd[2*i], &sum, sizeof(double));
-    close(fd[2*i+1]);
-    total += sum;
+  for (int i = stride*2-1; i <= array_size; i+=stride) {
+    f[i] += f[i-stride];
   }
   
-  /* single-thread summing */
-  double compareTotal = 0;
-  for (int i = 0; i < array_size; i++) {
-    compareTotal += f[i];
-  }
-
+  double total = f[array_size-1];
   /* check sum */
   if (total == compareTotal) {
     printf("Successfully summed numbers to: %f\n", total);
   } else {
     printf("Something went wrong.\n");
+    printf("Total should be: %f, but is %f\n", compareTotal, total);
   }
   return 0;
 }
