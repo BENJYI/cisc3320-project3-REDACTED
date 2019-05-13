@@ -1,4 +1,4 @@
-SRC = test-single.c test-switch.c test-switch2.c test-pthread.c
+SRC = test-shm.c
 OBJ = $(addsuffix .o, $(basename $(SRC)))
 TARGET = $(basename $(OBJ))
 CC = gcc
@@ -6,7 +6,7 @@ CCFLAGS = -Wall
 
 all: $(TARGET)
 
-test-shm: test-shm.o util.o
+test-shm: test-shm.o
 	${CC} ${CCFLAGS} -o $@ test-shm.o
 
 .c.o:
