@@ -18,17 +18,14 @@ void fileToArray(char *filename, double *f, int array_size) {
 int main(int argc, char *argv[]) {
   char *filename = argv[1];
   int array_size;
-  sscanf(argv[2], "%i", &array_size);
   double *f;
+
+  /* argument parsing */
+  sscanf(argv[2], "%i", &array_size);
   if ((f = malloc(array_size*sizeof(double))) == NULL) {
     perror("malloc()");
     exit(EXIT_FAILURE);
   }
   fileToArray(filename, f, array_size);
-
-  for (int i = 0; i < array_size; i++) {
-    printf("%f ", f[i]);
-  }
-
   return 0;
 }
