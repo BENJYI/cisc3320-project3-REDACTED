@@ -111,10 +111,11 @@ int main(int argc, char *argv[]) {
   
   double total = f[array_size-1];
   /* check sum */
+  printf("Total running cores: %d\n", m);
   if (total == compareTotal) {
     printf("Successfully summed numbers to: %f\n", total);
-    printf("Single thread time: %.04f\n", time1);
-    printf("Multi-thread time:  %.04f\n", time2);
+    printf("Single thread time: %.06fs\n", time1);
+    printf("Multi-thread time:  %.06fs\n", time2);
   } else {
     printf("Something went wrong.\n");
     printf("Total should be: %f, but is %f\n", compareTotal, total);
