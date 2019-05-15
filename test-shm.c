@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
   int stride = array_size / m;
 
   double compareTotal = 0;
-  start = getthrtime_x86();
+  start = gethrtime_x86();
   for (int i = 0; i < array_size; i++) {
     compareTotal += f[i];
   }
@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
 
 
   /* fork processes and get partial sums */
-  start = getthrtime_x86();
+  start = gethrtime_x86();
   for (int id = 0; id < m; id++) {
     if (fork() == 0) {
       /* set processor to child */
