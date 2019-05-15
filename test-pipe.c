@@ -5,6 +5,10 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <sys/mman.h>
+#include <sys/sysinfo.h>
+#include <sched.h>
+#include <semaphore.h>
+#include "util.h"
 
 void fileToArray(char *filename, double *f, int array_size) {
   FILE *file = fopen(filename, "r");
@@ -92,6 +96,11 @@ int main(int argc, char *argv[]) {
   /* fork processes and get partial sums */
   for (int id = 0; id < m; id++) {
     if (fork() == 0) {
+      /* set processor to child */
+      if (sched_setaffinity(getpid(), sizeof(set), set) < 0) {
+        perror("sched_setaffinity()");
+        exit(EXIT_FAILURE);
+      }
       getPartialSum(fd, id, f, id*stride, (id+1)*stride);
       exit(0);  
     } else {
