@@ -22,7 +22,7 @@ void fileToArray(char *filename, double *f, int array_size) {
   }
 }
 
-void setPartialSum(double *f, int l, int r, int array_size, int *lock) {
+void setPartialSum(double *f, int l, int r, int array_size) {
   if (r == array_size) r-=1;
   while (l+1 < r) {
     f[l+1] += f[l];
@@ -35,9 +35,9 @@ void setPartialSum(double *f, int l, int r, int array_size, int *lock) {
   
   // wait()
 
-  sem_wait(&mutex);
+  //sem_wait(&mutex);
   f[array_size-1] += f[l];
-  sem_post(&mutex);
+  //sem_post(&mutex);
 }
 
 int main(int argc, char *argv[]) {
@@ -77,7 +77,6 @@ int main(int argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
   f = mmap(NULL, array_size*sizeof(double), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
-  lock = 1;
   if (f < 0) {
     perror("mmap()");
     exit(EXIT_FAILURE);
