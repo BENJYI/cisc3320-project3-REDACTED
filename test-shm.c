@@ -7,6 +7,9 @@
 #include <sys/mman.h>
 #include <sys/sysinfo.h>
 #include <sched.h>
+#include <semaphore.h>
+
+sem_t mutex;
 
 void fileToArray(char *filename, double *f, int array_size) {
   FILE *file = fopen(filename, "r");
@@ -19,11 +22,22 @@ void fileToArray(char *filename, double *f, int array_size) {
   }
 }
 
-void setPartialSum(double *f, int l, int r) {
+void setPartialSum(double *f, int l, int r, int array_size, int *lock) {
+  if (r == array_size) r-=1;
   while (l+1 < r) {
     f[l+1] += f[l];
     l++;
   }
+  
+  /* since a race condition is not possible when each process
+     is access its own section of the array, we just take the
+     unnecessary step of always summing at one specific index. */
+  
+  // wait()
+
+  sem_wait(&mutex);
+  f[array_size-1] += f[l];
+  sem_post(&mutex);
 }
 
 int main(int argc, char *argv[]) {
@@ -31,7 +45,9 @@ int main(int argc, char *argv[]) {
   int array_size, m; 
   size_t size;
   m = get_nprocs(); // number of theads/processes
+  
   double *f;
+  sem_init(&mutex, 0, 1);
   struct sched_param sp;
   cpu_set_t *set;
   set = CPU_ALLOC(m);
@@ -61,6 +77,7 @@ int main(int argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
   f = mmap(NULL, array_size*sizeof(double), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+  lock = 1;
   if (f < 0) {
     perror("mmap()");
     exit(EXIT_FAILURE);
@@ -81,17 +98,17 @@ int main(int argc, char *argv[]) {
         perror("sched_setaffinity()");
         exit(EXIT_FAILURE);
       }
-      setPartialSum(f, id*stride, (id+1)*stride);
+      setPartialSum(f, id*stride, (id+1)*stride, array_size);
       exit(0);  
     } else {
       wait(NULL);
     }
   }
 
-  /* read partial sums from each child */
-  for (int i = stride*2-1; i <= array_size; i+=stride) {
-    f[i] += f[i-stride];
-  }
+  // /* read partial sums from each child */
+  // for (int i = stride*2-1; i <= array_size; i+=stride) {
+  //   f[i] += f[i-stride];
+  // }
   
   double total = f[array_size-1];
   /* check sum */
