@@ -72,15 +72,12 @@ int main(int argc, char *argv[]) {
 
   /* parse arguments */
   sscanf(argv[2], "%i", &array_size);
-  if ((f = malloc(array_size*sizeof(double))) == NULL) {
-    perror("malloc()");
-    exit(EXIT_FAILURE);
-  }
   f = mmap(NULL, array_size*sizeof(double), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
   if (f < 0) {
     perror("mmap()");
     exit(EXIT_FAILURE);
   }
+  
   fileToArray(filename, f, array_size);
   int stride = array_size / m;
 
