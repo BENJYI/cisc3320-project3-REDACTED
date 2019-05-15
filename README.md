@@ -3,8 +3,10 @@
 ### Note:
 
 1. Makefile is provided to compile all files, including utilities.
-2. All experiments are prefixed with "test-".
-3. All test files are prefixed with "testfile-N", where N is the number of elements, i.e. **testfile-4096** contains 4096 numbers. (These numbers should be whitespaced!)
+2. All experiments are prefixed with "test**type**-.c", where **type** is the primary method used for work balancing.
+3. All test files are prefixed with "testfile-**N**.c", where **N** is the number of elements, i.e. **testfile-4096** contains 4096 numbers. (These numbers should be whitespaced!)
+4. **test-shm.c** uses an in-place sum computing method. Each core sums its own section, and wait for a lock until it adds its result to the last index of the array, and then release the lock. This method allocated the numbers of the array to shared memory.
+5. **test-pipe.c** uses a separate sum variable. Each core sums its own section into a local sum variable, and writes to the pipe. The parent process will read the partial sums of each pipe and create a final total. This method uses pipes rather than shared memory.
 
 ### Usage:
 1. `make` compiles all files.
