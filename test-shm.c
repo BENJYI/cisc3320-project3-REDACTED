@@ -8,6 +8,7 @@
 #include <sys/sysinfo.h>
 #include <sched.h>
 #include <semaphore.h>
+#include "util.h"
 
 sem_t mutex;
 
@@ -43,6 +44,7 @@ int main(int argc, char *argv[]) {
   int array_size, m; 
   size_t size;
   m = get_nprocs(); // number of theads/processes
+  double start, time1, time2;
   
   double *f;
   sem_init(&mutex, 0, 1);
@@ -83,11 +85,15 @@ int main(int argc, char *argv[]) {
   int stride = array_size / m;
 
   double compareTotal = 0;
+  start = getthrtime_x86();
   for (int i = 0; i < array_size; i++) {
     compareTotal += f[i];
   }
+  time1 = gethrtime_x86()-start;
+
 
   /* fork processes and get partial sums */
+  start = getthrtime_x86();
   for (int id = 0; id < m; id++) {
     if (fork() == 0) {
       /* set processor to child */
@@ -99,6 +105,7 @@ int main(int argc, char *argv[]) {
       exit(0);  
     } else {
       wait(NULL);
+      time2 = gethrtime_x86()-start;
     }
   }
   
@@ -106,6 +113,8 @@ int main(int argc, char *argv[]) {
   /* check sum */
   if (total == compareTotal) {
     printf("Successfully summed numbers to: %f\n", total);
+    printf("Single thread time: %.04f\n", time1);
+    printf("Multi-thread time:  %.04f\n", time2);
   } else {
     printf("Something went wrong.\n");
     printf("Total should be: %f, but is %f\n", compareTotal, total);
