@@ -7,6 +7,7 @@
 3. All test files are prefixed with "testfile-**N**.c", where **N** is the number of elements, i.e. **testfile-4096** contains 4096 numbers. (These numbers should be whitespaced!)
 4. **test-shm.c** uses an in-place sum computing method. Each core sums its own section, and wait for a lock until it adds its result to the last index of the array, and then release the lock. This method allocated the numbers of the array to shared memory.
 5. **test-pipe.c** uses a separate sum variable. Each core sums its own section into a local sum variable, and writes to the pipe. The parent process will read the partial sums of each pipe and create a final total. This method uses pipes rather than shared memory.
+6. Results of the test methods along with each test data is located in **results/**.
 
 ### Usage:
 1. `make` compiles all files.
