@@ -16,7 +16,7 @@
 
 ### Example:
 1. `make`
-2. `./test-shm.c testfile-262144.txt 262144`
+2. `./test-shm testfile-262144.txt 262144`
 
 ---
 ## Results
