@@ -32,12 +32,10 @@ void setPartialSum(double *f, int l, int r, int array_size) {
   /* since a race condition is not possible when each process
      is access its own section of the array, we just take the
      unnecessary step of always summing at one specific index. */
-  
-  // wait()
 
-  //sem_wait(&mutex);
-  f[array_size-1] += f[l];
-  //sem_post(&mutex);
+  sem_wait(&mutex);
+  f[array_size-1] += f[l];  // critical section
+  sem_post(&mutex);
 }
 
 int main(int argc, char *argv[]) {
@@ -103,11 +101,6 @@ int main(int argc, char *argv[]) {
       wait(NULL);
     }
   }
-
-  // /* read partial sums from each child */
-  // for (int i = stride*2-1; i <= array_size; i+=stride) {
-  //   f[i] += f[i-stride];
-  // }
   
   double total = f[array_size-1];
   /* check sum */
