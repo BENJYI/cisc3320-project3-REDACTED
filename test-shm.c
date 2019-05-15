@@ -7,6 +7,10 @@
 #include <sys/mman.h>
 #include <sys/sysinfo.h>
 #include <sched.h>
+#include <semaphore.h>
+#include "util.h"
+
+sem_t mutex;
 
 void fileToArray(char *filename, double *f, int array_size) {
   FILE *file = fopen(filename, "r");
@@ -19,11 +23,20 @@ void fileToArray(char *filename, double *f, int array_size) {
   }
 }
 
-void setPartialSum(double *f, int l, int r) {
+void setPartialSum(double *f, int l, int r, int array_size) {
+  if (r == array_size) r-=1;
   while (l+1 < r) {
     f[l+1] += f[l];
     l++;
   }
+  
+  /* since a race condition is not possible when each process
+     is access its own section of the array, we just take the
+     unnecessary step of always summing at one specific index. */
+
+  sem_wait(&mutex);
+  f[array_size-1] += f[l];  // critical section
+  sem_post(&mutex);
 }
 
 int main(int argc, char *argv[]) {
@@ -31,7 +44,10 @@ int main(int argc, char *argv[]) {
   int array_size, m; 
   size_t size;
   m = get_nprocs(); // number of theads/processes
+  double start, time1, time2;
+  
   double *f;
+  sem_init(&mutex, 0, 1);
   struct sched_param sp;
   cpu_set_t *set;
   set = CPU_ALLOC(m);
@@ -69,14 +85,18 @@ int main(int argc, char *argv[]) {
   int stride = array_size / m;
 
   double compareTotal = 0;
+  start = getthrtime_x86();
   for (int i = 0; i < array_size; i++) {
     compareTotal += f[i];
   }
+  time1 = gethrtime_x86()-start;
+
 
   /* set schedular to fifo */
   
 
   /* fork processes and get partial sums */
+  start = getthrtime_x86();
   for (int id = 0; id < m; id++) {
     if (fork() == 0) {
       /* set processor to child */
@@ -84,22 +104,20 @@ int main(int argc, char *argv[]) {
         perror("sched_setaffinity()");
         exit(EXIT_FAILURE);
       }
-      setPartialSum(f, id*stride, (id+1)*stride);
+      setPartialSum(f, id*stride, (id+1)*stride, array_size);
       exit(0);  
     } else {
       wait(NULL);
+      time2 = gethrtime_x86()-start;
     }
-  }
-
-  /* read partial sums from each child */
-  for (int i = stride*2-1; i <= array_size; i+=stride) {
-    f[i] += f[i-stride];
   }
   
   double total = f[array_size-1];
   /* check sum */
   if (total == compareTotal) {
     printf("Successfully summed numbers to: %f\n", total);
+    printf("Single thread time: %.04f\n", time1);
+    printf("Multi-thread time:  %.04f\n", time2);
   } else {
     printf("Something went wrong.\n");
     printf("Total should be: %f, but is %f\n", compareTotal, total);
