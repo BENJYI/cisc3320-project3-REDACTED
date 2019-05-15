@@ -77,7 +77,7 @@ int main(int argc, char *argv[]) {
     perror("mmap()");
     exit(EXIT_FAILURE);
   }
-  
+
   fileToArray(filename, f, array_size);
   int stride = array_size / m;
 
@@ -107,7 +107,10 @@ int main(int argc, char *argv[]) {
   
   double total = f[array_size-1];
   /* check sum */
-  printf("Total running cores: %d\n", m);
+  printf("\nResults: \n");
+  printf("No. of Cores: %d\n", m);
+  printf("Target sum: %f\n", compareTotal);
+  printf("=======================================\n");
   if (total == compareTotal) {
     printf("Successfully summed numbers to: %f\n", total);
     printf("Single thread time: %.06fs\n", time1);
@@ -116,5 +119,7 @@ int main(int argc, char *argv[]) {
     printf("Something went wrong.\n");
     printf("Total should be: %f, but is %f\n", compareTotal, total);
   }
+  printf("\n");
+
   return 0;
 }

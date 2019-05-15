@@ -118,7 +118,10 @@ int main(int argc, char *argv[]) {
 
   time2 = gethrtime_x86()-start;
 
-  printf("Total running cores: %d\n", m);
+  printf("\nResults: \n");
+  printf("No. of Cores: %d\n", m);
+  printf("Target sum: %f\n", compareTotal);
+  printf("=======================================\n");
   if (total == compareTotal) {
     printf("Successfully summed numbers to: %f\n", total);
     printf("Single thread time: %.06fs\n", time1);
@@ -127,6 +130,6 @@ int main(int argc, char *argv[]) {
     printf("Something went wrong.\n");
     printf("Total should be: %f, but is %f\n", compareTotal, total);
   }
-  
+  printf("\n");
   return 0;
 }
