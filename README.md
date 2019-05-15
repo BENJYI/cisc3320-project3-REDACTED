@@ -19,18 +19,11 @@
 2. `./test-shm.c testfile-262144.txt 262144`
 
 ---
+## Results
 
-## Project Description
+### Shared memory and in-place sum computing
 
-### Objective
-1. Divide an array by the number of cores (if using a multicore system), or by some M number of threads (if using multithreading).
+![alt text](https://raw.githubusercontent.com/BENJYI/project2-accessories/master/data/result-shm.png)
 
-2. Delegate the partial sum in each section to each individual thread/process.
-
-3. Sum the partial sums and produce the output.
-
-4. Use a single thread to sum the array and to compare the results.
-
-### Optional Task
-
-Divide the array using strides, where the stride is the number of cores or threads. Continue from step 2.
+### Piping and out-of-place sum computing
+![alt text](https://raw.githubusercontent.com/BENJYI/project2-accessories/master/data/result-pipe.png)
