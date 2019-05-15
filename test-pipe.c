@@ -4,7 +4,6 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/types.h>
-#include <sys/mman.h>
 #include <sys/sysinfo.h>
 #include <sched.h>
 #include <semaphore.h>
@@ -71,7 +70,6 @@ int main(int argc, char *argv[]) {
     perror("malloc()");
     exit(EXIT_FAILURE);
   }
-  f = mmap(NULL, array_size*sizeof(double), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
   if (f < 0) {
     perror("mmap()");
     exit(EXIT_FAILURE);
