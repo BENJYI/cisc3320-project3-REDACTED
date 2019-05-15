@@ -24,7 +24,6 @@ void fileToArray(char *filename, double *f, int array_size) {
 void getPartialSum(int *fd, int id, double *f, int l, int r) {
   close(fd[2*id]);
   double sum = 0;
-  printf("Getting partial sum for id: %d, from indexes %d to %d\n", id,l,r);
   for(int i = l; i < r; i++) {
     sum += f[i];
   }
