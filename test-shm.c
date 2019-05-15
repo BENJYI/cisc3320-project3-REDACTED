@@ -91,10 +91,6 @@ int main(int argc, char *argv[]) {
   }
   time1 = gethrtime_x86()-start;
 
-
-  /* set schedular to fifo */
-  
-
   /* fork processes and get partial sums */
   start = gethrtime_x86();
   for (int id = 0; id < m; id++) {

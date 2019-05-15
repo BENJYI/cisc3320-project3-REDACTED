@@ -10,6 +10,8 @@
 #include <semaphore.h>
 #include "util.h"
 
+sem_t mutex;
+
 void fileToArray(char *filename, double *f, int array_size) {
   FILE *file = fopen(filename, "r");
   if (file == NULL) { 
